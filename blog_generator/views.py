@@ -91,7 +91,7 @@ def get_transcription(link):
     print('Trans')
     audio_file=download_audio(link)
     print("Audio",audio_file)
-    aai.settings.api_key="487dde5c25bc40bfa090f83ca3d09765"
+    aai.settings.api_key=os.environ.get("aai_key")
 
     print("Transibing..")
     transcriber=aai.Transcriber()
