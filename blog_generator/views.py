@@ -9,7 +9,13 @@ from django.conf import settings
 from pytubefix import YouTube
 import os
 import assemblyai as aai
-import openai
+from groq import Groq
+from .models import blogpost
+from dotenv import load_dotenv
+
+load_dotenv()
+
+print("Api Key", os.environ.get("GROQ_API_KEY"))
 
 # Create your views here.
 @login_required
@@ -47,7 +53,13 @@ def generate_blog(request):
         if not blog_content:
             return JsonResponse({'error':"failed to get transcript"},status=500)
         # save blog article to the database
-
+        new_bklog_article=blogpost.objects.create(
+            user=request.user,
+            youtube_title=title,
+            youtube_link=yt_link,
+            generated_content=blog_content,
+        )
+        new_bklog_article.save()
         # return blog article as a response
         return JsonResponse({'content':blog_content})
     else:
@@ -91,15 +103,38 @@ def get_transcription(link):
     return transcript.text
 
 def generate_blog_from_transcription(transcription):
-    openai.api_key="sk-7a6nlpLftFaxI-J9hV_B36Mq-FP48H3SbwZNtREzpwT3BlbkFJuNRcYHoe3Kfwjts9u0QPnnqRgjKEM5KI1Rfk3kHdQA"
-    prompt = f"Based on the following transcript from a YouTube video, write a comprehensive blog article, write it based on the transcript, but dont make it look like a youtube video, make it look like a proper blog article:\n\n{transcription}\n\nArticle:"
-    response=openai.Completion.create(
-        model="gpt-3.5-turbo-instruct",
-        prompt=prompt,
-        max_tokens=1000
+    client = Groq(
+    # This is the default and can be omitted
+    api_key=os.environ.get("GROQ_API_KEY"),
     )
-    generated_content=response.choices[0].text.strip()
+    prompt = f"Based on the following transcript from a YouTube video, write a comprehensive blog article, write it based on the transcript, but dont make it look like a youtube video, make it look like a proper blog article:\n\n{transcription}\n\nArticle:"
+    # response=openai.Completion.create(
+    #     model="gpt-3.5-turbo-instruct",
+    #     prompt=prompt,
+    #     max_tokens=1000
+    # )
+    chat_completion = client.chat.completions.create(
+    messages=[
+        {
+            "role": "user",
+            "content":prompt,
+        }
+    ],
+    model="llama3-8b-8192",
+)
+    generated_content=chat_completion.choices[0].message.content
     return generated_content
+
+def blog_list(request):
+    blog_articles=blogpost.objects.filter(user=request.user)
+    return render(request,"all-blog.html",{"blog_articles":blog_articles})
+
+def blog_details(request,pk):
+    blog_article_detail=blogpost.objects.get(id=pk)
+    if request.user==blog_article_detail.user:
+        return render(request,'blog-details.html',{"blog_article_detail":blog_article_detail})
+    else:
+        return redirect('/')
 
 def user_login(request):
     if request.method=='POST':

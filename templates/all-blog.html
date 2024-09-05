@@ -13,8 +13,10 @@
             <h1 class="text-2xl font-bold">AI BLOG POST</h1>
         </div>
         <div>
-            <a href="#" class="text-white hover:underline">logout</a>
-        </div>
+            <a class="text-white">Welcome {{user.username}}</a>
+            <a href="/blog-list" class="text-white mx-4 hover:underline">Saved Blog Post</a>
+        <a href="#" class="text-white hover:underline">logout</a>
+    </div>
     </nav>
     <br>
     <!-- main content container -->
@@ -26,16 +28,15 @@
                     All Blog Post
                 </h2>
                 <div class="space-y-4 ">
+                    {% for article in blog_articles reversed %}
+                    <a href="blog-details/{{article.id}}">
                     <div class="border border-gray-400 p-4 rounded-lg">
-                        <h2 class="text-lg font-semibold">Blog post title 1</h2>
-                        <p>This is the content of the blog post.......
+                        <h2 class="text-lg font-semibold">{{article.youtube_title}}</h2>
+                        <p>{{article.generated_content|truncatechars:80}}
                         </p>
                     </div>
-                    <div class="border border-gray-400 p-4 rounded-lg">
-                        <h2 class="text-lg font-semibold">Blog post title 2</h2>
-                        <p>This is the content of the blog post.......
-                        </p>
-                    </div>
+                </a>
+                    {% endfor %}
                     <!-- repeat -->
                 </div>
              </section>
