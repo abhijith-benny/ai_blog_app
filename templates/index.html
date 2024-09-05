@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI blog generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+    <style>
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to { 
+                transform: rotate(360deg);
+            }
+        }
+         
+        
+         @-webkit-keyframes rotate {
+            from {
+                -webkit-transform: rotate(0deg);
+            }
+            to { 
+                -webkit-transform: rotate(360deg);
+            }
+        }
+        
+        .load {
+            width: 100px;
+            height: 100px;
+            margin: 110px auto 0;
+            border:solid 10px #8822aa;
+            border-radius: 50%;
+            border-right-color: transparent;
+            border-bottom-color: transparent;
+             -webkit-transition: all 0.5s ease-in;
+            -webkit-animation-name:             rotate; 
+            -webkit-animation-duration:         1.0s; 
+            -webkit-animation-iteration-count:  infinite;
+            -webkit-animation-timing-function: linear;
+                
+                 transition: all 0.5s ease-in;
+            animation-name:             rotate; 
+            animation-duration:         1.0s; 
+            animation-iteration-count:  infinite;
+            animation-timing-function: linear; 
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-scrren bg-gray-400 font-sans antialised">
+    <!-- navbar -->
+    <nav class="bg-blue-600 p-4 text-white flex justify-between">
+        <div>
+            <h1 class="text-2xl font-bold">AI BLOG GENERATOR</h1>
+        </div>
+        <div>
+            <a class="text-white">Welcome {{user.username}}</a>
+            <a href="logout" class="text-white hover:underline">logout</a>
+        </div>
+    </nav>
+    <br>
+    <br>
+    <!--main-->
+    
+    <div class="flex-grow container mx-auto mt-10 px-4 sm:px-0">
+        <div class="max-w-3xl mx-auto bg-white p-6 rounded-lg ">
+            <div class="text-center">
+                <!-- introduction section -->
+                <h2 class="text-2xl font-semibold mb-4"> Welcome to the AI Blog Generator</h2>
+                <p class="text-gray-700">
+                    Generate high-quality blog articles from YouTube videos using artifical intelligence.Simply enter the link to the YouTube video below and let the AI create the content for you! 
+                </p>
+            </div>
+            <br>
+            <div>
+                <h1 class="text=x1 mb-4 font-semibold">Enter Youtube Video Link</h1>
+                <div class="flux space-x-4">
+                        <input id="youtubelink" type="url" placeholder="paste youtube link..." class="flex-grow border border-blue-400 rounded-sm">
+                        <button id="generateblogbutton" class="bg-blue-600 text-white px-4 py-1 rounded-r-md hover:bg-blue-800">Generate</button>           
+                </div>
+            </div>
+             <!-- section for loading circle -->
+              <div style="display:none" id="loading-circle" class="load"></div>
+                <!-- generated blog display -->
+                <section class="mt-10 flex-grow">
+                    <h2 class="text-x1 mb-4 font-semibold">Generated Blog Article</h2>
+                    <div id="blogcontent" class="text-gray-700 mt-4 space-y-4">
+                       
+
+
+                    </div>
+                </section> 
+            
+        </div>
+    </div>
+    <footer class="text-center p-4 text:black mt-2">
+        Powered by <a href="https://www.instagram.com/_abhijith_benny/" class="hover:underline">Abhijith</a>
+    </footer>
+    <script>
+        document.getElementById('generateblogbutton').addEventListener('click', async () => {
+            
+
+            const youtubeLink = document.getElementById('youtubelink').value;
+            const blogContent = document.getElementById('blogcontent');
+            
+            if(youtubeLink) {
+                document.getElementById('loading-circle').style.display = 'block';
+                
+                blogContent.innerHTML = ''; // Clear previous content
+
+                const endpointUrl = '/generate-blog';
+                
+                try {
+                    const response = await fetch(endpointUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ link: youtubeLink })
+                    });
+
+                    const data = await response.json();
+
+                    blogContent.innerHTML = data.content;
+
+                } catch (error) {
+                    console.error("Error occurred:", error);
+                    alert("Something went wrong. Please try again later.");
+                }
+                document.getElementById('loading-circle').style.display = 'none';
+            } else {
+                alert("Please enter a YouTube link.");
+            }
+        });
+    </script>
+</body>
+</html>
